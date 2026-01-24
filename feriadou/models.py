@@ -1,7 +1,6 @@
 from django.db import models
 import sys
 from dataclasses import dataclass
-from django.conf import settings
 
 try:
     from django.db import models
@@ -21,8 +20,9 @@ class Local():
 class Feriado(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     name = models.CharField(max_length=100)
-    date = models.DateField()
-    local = Local()
+    day = models.PositiveIntegerField()
+    month = models.PositiveIntegerField(choices=[(i, i) for i in range(1, 13)])
+    local = Local(Cidade='', Estado='')
     NACIONAL = 'Nacional'
     ESTADUAL = 'Estadual'
     MUNICIPAL = 'Municipal'
@@ -32,14 +32,16 @@ class Feriado(models.Model):
         (MUNICIPAL, "Municipal"),
     ]
     escopo = models.CharField(
+        max_length = 20,
         null = False,
-        choices=escopo_choices,
-        default=NACIONAL,
+        choices = escopo_choices,
+        default = NACIONAL,
     )
 
     def __str__(self):
-        return f"""
-        Nome: {self.name},
-        Data: {self.date},
-        Escopo: {self.escopo}"
-        """
+        return f"{self.name} - {self.day:02d}/{self.month:02d} ({self.escopo})"
+    
+    @property
+    def date_display(self):
+        """Display as MM/DD for templates"""
+        return f"{self.day:02d}/{self.month:02d}"

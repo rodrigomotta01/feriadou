@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+        extend: {
+            colors: {
+            fwhite: '#F8F8F8',
+            fblack: '#1E1E1E',
+            rose: '#FF0285',
+            pink: '#FF68D9',
+            magenta: '#A812FF',
+            purple: '#560088',
+            }
+        }
+        }
+    }
+    </script>
+    <title>{% block title %} Feriadou {% endblock %}</title>        
+</head>  
+<body class="bg-fwhite text-gray-900">
+    <header class="bg-fwhite p-4">
+        <div class="flex items-center justify-between relative">
+            
+            <!-- Esquerda -->
+            <div class="flex space-x-4 ml-40">
+            <a href="{% url 'calendarcurrent_view' %}" 
+                class="text-lg font-medium text-fblack hover:underline">
+                Calendário
+            </a>
+            </div>
+
+            <!-- Centro -->
+            <a href="{% url 'calendarcurrent_view' %}"
+            class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 pt-2">
+            <img src="{% static 'img/feriadou_logo.svg' %}" 
+                 alt="Feriadou Logo">
+            </a>
+
+            <!-- Direita -->
+            <div class="flex items-center space-x-4 mr-40">
+            <a href="https://example.com" 
+                class="w-32 border-[1.5px] border-rose rounded-3xl text-lg font-medium text-rose text-center py-2 hover:bg-rose hover:text-gray-100 transform hover:scale-105 transition duration-300">
+                Login
+            </a>
+            <a href="https://example.com" 
+                class="w-32 bg-rose rounded-3xl text-lg font-medium text-gray-100 text-center py-2 transform hover:scale-105 transition duration-300">
+                Cadastrar-se
+            </a>
+            </div>
+
+        </div>
+    </header>
+    <main class="p-4 ml-40 mr-40">
+        {% block content %}
+        <!-- Conteúdo -->
+        {% endblock %}
+    </main>
+    <footer class="bg-rose text-gray-100 p-4 mt-4 text-center">
+        &copy; 2025 Feriadou. Todos os direitos reservados.
+    </footer>
+</body>
+</html>
+   
