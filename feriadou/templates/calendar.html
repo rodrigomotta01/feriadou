@@ -6,9 +6,24 @@ Feriadou - Calendário
 {% endblock %}
 
 {% block content %}
+
 <h2 class="text-[2rem] font-medium text-fblack">Feriados em Rio de Janeiro, RJ</h2>
 
-<div class="max-w-md justify-items-center mx-auto p-4">
+<section class="flex justify-between my-12 w-full">
+
+<div class="flex-1 max-w-[22rem] p-8 bg-rose rounded-2xl shadow">
+  <h3 class="text-xl text-center font-bold text-fwhite mb-4">Feriados Próximos</h3>
+  <ul class="text-left list-disc font-semibold list-outside space-y-4 text-fwhite max-w-[16rem] mx-auto">
+    {% for feriado in feriados %}
+    <li><span class="font-bold">{{ feriado.date_display }}:</span> {{ feriado.name }} ({{ feriado.escopo }})</li>
+    {% empty %}
+        <li>Nenhum feriado próximo.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="border border-rose border-2 rounded-2xl w-fit p-20 pb-16 pt-8">
+<div class="justify-items-center">
   <div class ="flex flex-row items-center justify-between gap-4 mb-4">
     <a href="{% url 'calendar_view' year=previous_year month=previous_month %}"
     class="">
@@ -17,7 +32,7 @@ Feriadou - Calendário
     <h2 class="text-[2rem] font-medium text-fblack text-center mx-6 mb-2">{{ month_name }}</h2>
     <a href="{% url 'calendar_view' year=next_year month=next_month %}"><img src="{% static 'img/arrowright.svg' %}"></a>
   </div>
-  <div class="grid grid-cols-7 gap-y-6 gap-x-40 text-center text-[2rem] font-medium text-fblack">
+  <div class="grid grid-cols-7 gap-y-6 gap-x-20 w-fit text-center text-[2rem] font-medium text-fblack">
     <div class="font-semibold">Dom</div>
     <div class="font-semibold">Seg</div>
     <div class="font-semibold">Ter</div>
@@ -32,7 +47,13 @@ Feriadou - Calendário
         {% if day == 0 %}
           <div class="w-16 h-16"></div>
         {% elif day in feriados_days %}
+          {% if day in feriadosmunicipais %}
+          <div class="bg-pink text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          {% elif day in feriadosestaduais %}
+          <div class="bg-magenta text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          {% elif day in feriadosnacionais %}
           <div class="bg-purple text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          {% endif %}
         {% else %}
           <div class="text-rose w-16 h-16 flex items-center justify-center">{{ day }}</div>
         {% endif %}
@@ -40,15 +61,7 @@ Feriadou - Calendário
     {% endfor %}
 
 </div>
-
-<div class="mt-8 max-w-2xl mx-auto p-4 bg-white rounded-lg shadow">
-  <h3 class="text-xl font-semibold text-rose mb-4">Feriados Próximos</h3>
-  <ul class="list-disc list-inside space-y-2 text-gray-800">
-    {% for feriado in feriados %}
-    <li><span class="font-medium">{{ feriado.date_display }}:</span> {{ feriado.name }} ({{ feriado.escopo }})</li>
-    {% empty %}
-        <li>Nenhum feriado próximo.</li>
-    {% endfor %}
-  </ul>
+</div>
+</section>
 
 {% endblock %}

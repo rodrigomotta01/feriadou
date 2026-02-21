@@ -23,14 +23,29 @@
     </script>
     <title>{% block title %} Feriadou {% endblock %}</title>        
 </head>  
-<body class="bg-fwhite text-gray-900">
+<body class="bg-fwhite text-gray-900 min-h-screen flex flex-col">
+    {% if messages %}
+        <div id='msg' class="fixed top-4 right-4 z-50 space-y-2">
+            {% for message in messages %}
+                <div class="bg-green-500 text-fwhite px-4 py-2 rounded shadow fade-auto">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+
+    <script>
+        setTimeout(function() {
+            document.getElementById('msg').style.display = 'none';
+        }, 2500);
+    </script>
+    {% endif %}
     <header class="bg-fwhite p-4">
         <div class="flex items-center justify-between relative">
             
             <!-- Esquerda -->
             <div class="flex space-x-4 ml-40">
             <a href="{% url 'calendarcurrent_view' %}" 
-                class="text-lg font-medium text-fblack hover:underline">
+                class="text-lg font-medium text-rose hover:underline">
                 Calendário
             </a>
             </div>
@@ -44,14 +59,24 @@
 
             <!-- Direita -->
             <div class="flex items-center space-x-4 mr-40">
-            <a href="https://example.com" 
-                class="w-32 border-[1.5px] border-rose rounded-3xl text-lg font-medium text-rose text-center py-2 hover:bg-rose hover:text-gray-100 transform hover:scale-105 transition duration-300">
-                Login
-            </a>
-            <a href="https://example.com" 
-                class="w-32 bg-rose rounded-3xl text-lg font-medium text-gray-100 text-center py-2 transform hover:scale-105 transition duration-300">
-                Cadastrar-se
-            </a>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout_view' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit"
+                        class="w-32 border-[1.5px] border-rose rounded-3xl text-lg font-medium text-rose text-center p-2 hover:bg-rose hover:text-gray-100 transform hover:scale-105 transition duration-300">
+                        Logout
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login_view' %}" 
+                    class="w-32 border-[1.5px] border-rose rounded-3xl text-lg font-medium text-rose text-center p-2 hover:bg-rose hover:text-gray-100 transform hover:scale-105 transition duration-300">
+                    Login
+                </a>
+            {% endif %}
+                <a href="{% url 'signup_view' %}" 
+                    class="w-36 p-2 bg-rose rounded-3xl text-lg font-medium text-gray-100 text-center transform hover:scale-105 transition duration-300">
+                    Cadastrar-se
+                </a>
             </div>
 
         </div>
@@ -61,7 +86,7 @@
         <!-- Conteúdo -->
         {% endblock %}
     </main>
-    <footer class="bg-rose text-gray-100 p-4 mt-4 text-center">
+    <footer class="bg-rose text-gray-100 p-4 mt-auto text-center">
         &copy; 2025 Feriadou. Todos os direitos reservados.
     </footer>
 </body>
