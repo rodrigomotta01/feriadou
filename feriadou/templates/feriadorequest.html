@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+    <script>
+    tailwind.config = {
+        theme: {
+        extend: {
+            colors: {
+            fwhite: '#F8F8F8',
+            fblack: '#1E1E1E',
+            rose: '#FF0285',
+            pink: '#FF68D9',
+            magenta: '#A812FF',
+            purple: '#560088',
+            }
+        }
+        }
+    }
+    </script>
+    <title>Fazer solicitação - Feriadou</title>
+</head>
+<body class="bg-rose flex items-center justify-center min-h-screen p-4 ">
+
+    <div class="bg-fwhite rounded-3xl shadow-xl justify-center flex flex-col md:flex-row w-full max-w-4xl lg:max-w-5xl min-h-[480px] 2xl:min-h-[650px]">
+        
+        
+
+        <div class="w-full md:w-[65%] p-8 2xl:p-12 flex flex-col justify-center relative">
+            
+            <div class="mx-auto w-full">
+                
+                <img class=" mx-auto mb-10" src="{% static 'img/feriadou_logo.svg' %}" 
+                    alt="Feriadou Logo">
+                </a>
+
+                <h2 class="text-3xl 2xl:text-4xl font-bold text-fblack mb-2">Fazer solicitação</h2>
+
+                <p class="text-fblack text-xs 2xl:text-sm mb-4 leading-relaxed">
+                    Faça uma solicitação para incluir novos feriados na plataforma! 
+                </p>
+
+                <p class="text-fblack text-xs 2xl:text-sm mt-4 mb-6">
+                    Voltar ao <a href="{% url 'calendarcurrent_view' %}"><span class="text-rose font-medium hover:underline">Início</span></a>
+                </p>
+
+                <form method="POST" action="{% url 'feriadorequest_view' %}">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div class="mb-4 mt-4 p-2 bg-red-100 text-red-600 rounded text-xs text-center">
+                                {{ field.label }}: {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    <div class="mb-4 2xl:mb-5">
+                        <label class="block text-nblack text-sm font-semibold mb-1 2xl:mb-2" for="name">
+                            Nome do Feriado
+                        </label>
+                        <input class="w-full px-4 py-2.5 2xl:py-3 rounded-lg border border-gray-300 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack placeholder-gray-400 text-sm 2xl:text-base"
+                               type="text" 
+                               name="name" 
+                               id="name"
+                               placeholder="Ex: Natal" 
+                               required>
+                    </div>
+
+                    <div class="mb-4 2xl:mb-5">
+                        <label class="block text-nblack text-sm font-semibold mb-1 2xl:mb-2" for="day">
+                            Dia
+                        </label>
+                        <input class="w-full px-4 py-2.5 2xl:py-3 rounded-lg border border-gray-300 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack placeholder-gray-400 text-sm 2xl:text-base"
+                               type="number" 
+                               name="day" 
+                               id="day"
+                               placeholder="Ex: 1 ou 31" 
+                               min="1"
+                               max="31"
+                               required>
+                    </div>
+
+                    <div class="mb-5 2xl:mb-6 relative">
+                        <div class="flex justify-between items-center mb-1 2xl:mb-2">
+                            <label class="block text-nblack text-sm font-semibold" for="month">
+                                Mês
+                            </label>
+                        </div>
+                        <input class="w-full px-4 py-2.5 2xl:py-3 rounded-lg border border-gray-300 focus:border-npurple focus:ring-2 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack placeholder-gray-400 text-sm 2xl:text-base"
+                               type="number" 
+                               name="month" 
+                               id="month"
+                               placeholder="Ex: 1 ou 12" 
+                               min="1"
+                               max="12"
+                               required>
+                    </div>
+
+                    <div class="mb-5 2xl:mb-6 relative">
+                        <div class="flex justify-between items-center mb-1 2xl:mb-2">
+                            <label class="block text-nblack text-sm font-semibold" for="escopo">
+                                Escopo do Feriado
+                            </label>
+                        </div>
+                        <select class="w-full px-4 py-2.5 2xl:py-3 rounded-lg  bg-white border border-gray-300 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack text-sm 2xl:text-base"
+                                name="escopo" 
+                                id="escopo"
+                                required>
+                            <option value="">Selecione o escopo</option>
+                            <option value="Nacional">Nacional</option>
+                            <option value="Estadual">Estadual</option>
+                            <option value="Municipal">Municipal</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4 2xl:mb-5">
+                        <label class="block text-nblack text-sm font-semibold mb-1 2xl:mb-2" for="estado">
+                            Sigla do Estado (- caso Nacional)
+                        </label>
+                        <input class="w-full px-4 py-2.5 2xl:py-3 rounded-lg border border-gray-300 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack placeholder-gray-400 text-sm 2xl:text-base"
+                               type="text" 
+                               name="estado" 
+                               id="estado"
+                               placeholder="Ex: RJ (duas letras apenas)" 
+                               maxlength="2"
+                               required>
+                    </div>
+
+                    <div class="mb-4 2xl:mb-5">
+                        <label class="block text-nblack text-sm font-semibold mb-1 2xl:mb-2" for="municipio">
+                            Município do Feriado (- caso Nacional/Estadual)
+                        </label>
+                        <input class="w-full px-4 py-2.5 2xl:py-3 rounded-lg border border-gray-300 focus:border-rose focus:ring-2 focus:ring-rose/20 outline-none transition-all text-fblack placeholder-gray-400 text-sm 2xl:text-base"
+                               type="text" 
+                               name="municipio" 
+                               id="municipio"
+                               placeholder="Ex: Rio de Janeiro" 
+                               required>
+                    </div>
+
+                    <button type="submit" class="w-full mt-2 bg-rose hover:bg-[#FF71AA] text-white font-bold mb-4 py-2.5 2xl:py-3 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm 2xl:text-base">
+                        Enviar
+                    </button>
+                </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

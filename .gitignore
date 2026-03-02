@@ -20,10 +20,6 @@ env/
 ENV/
 Django.venv
 
-# --- Poetry ---
-poetry.toml
-poetry.lock
-
 # --- Testes e IDE ---
 .pytest_cache/
 .vscode/

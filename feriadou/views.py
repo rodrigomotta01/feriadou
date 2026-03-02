@@ -1,26 +1,44 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from .models import Feriado
 from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login
 from django.views.generic import CreateView
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
-from .forms import LoginForm, SignUpForm, UsernamePasswordResetForm, PasswordResetForm
-from google.oauth2 import id_token
-from google.auth.transport import requests
-from django.conf import settings
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from .forms import LoginForm, SignUpForm, PasswordResetForm, FeriadoRequestForm
 from django.contrib import messages
-import logging
 import calendar
 from datetime import date
 from django.urls import reverse_lazy
+import requests
+from django.core.cache import cache
 
-# Create your views here.
+def get_municipios(uf):
+    cache_key = f'municipios_{uf}'
+    municipios = cache.get(cache_key)
+    if municipios:
+        return municipios
+    
+    link = f"https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios"
+    requisicao = requests.get(link, timeout=3)
+    info = requisicao.json()
+    
+    municipios = []
+
+    for municipio in info:
+        municipios.append(municipio['nome'])
+
+    cache.set(cache_key, municipios, timeout=60*60*2)
+    return municipios
+
 def calendar_view(request, year=None, month=None):
-    #CALENDARIO
+    
+    uf = request.GET.get('uf')
+    municipio = request.GET.get('municipio')
 
+    #CALENDARIO
     now = date.today()
     if year is None:
         year = now.year
@@ -77,9 +95,14 @@ def calendar_view(request, year=None, month=None):
     feriados_mes = Feriado.objects.filter(month=month)
     feriados_days = {feriado.day for feriado in feriados_mes}
 
-    feriados_municipais = {f.day for f in Feriado.objects.filter(escopo="Municipal", month=month)}
-    feriados_estaduais = {f.day for f in Feriado.objects.filter(escopo="Estadual", month=month)}
+    feriados_municipais = {f.day for f in Feriado.objects.filter(escopo="Municipal", month=month, estado=uf, municipio=municipio)}
+    feriados_estaduais = {f.day for f in Feriado.objects.filter(escopo="Estadual", month=month, estado=uf)}
     feriados_nacionais = {f.day for f in Feriado.objects.filter(escopo="Nacional", month=month)}
+
+    if uf:
+        municipios = get_municipios(uf)
+    else:
+        municipios = None
 
     context = {
         'next_month': next_month,
@@ -94,7 +117,10 @@ def calendar_view(request, year=None, month=None):
         'feriados_days': feriados_days,
         'feriadosmunicipais': feriados_municipais,
         'feriadosestaduais': feriados_estaduais,
-        'feriadosnacionais': feriados_nacionais
+        'feriadosnacionais': feriados_nacionais,
+        'uf': uf,
+        'municipio' : municipio,
+        'municipios' : municipios
         
     }
 
@@ -125,44 +151,27 @@ class my_logout_view(LogoutView):
 class my_passwordreset_view(PasswordResetView):
     template_name = 'passwordreset.html'
     form_class = PasswordResetForm
-    success_url = reverse_lazy("password_reset_done")
+    success_url = reverse_lazy("passwordresetdone_view")
     email_template_name = 'registration/password_reset_email.html'
+    html_email_template_name = 'registration/password_reset_email.html'
     subject_template_name = 'registration/password_reset_subject.txt'
 
-"""@csrf_exempt
-def login_google_view(request):
-    if request.method == 'POST':
+class my_passwordresetdone_view(PasswordResetDoneView):
+    template_name = 'passwordresetdone.html'
 
-        token = request.POST.get("credential")
+class my_passwordresetconfirm_view(PasswordResetConfirmView):
+    template_name = 'passwordresetconfirm.html'
+    success_url = reverse_lazy('passwordresetcomplete_view')
 
-        try:
-            data = id_token.verify_oauth2_token(
-                token,
-                requests.Request(),
-                settings.GOOGLE_OAUTH_CLIENT_ID,
-                clock_skew_in_seconds=300  # tolera até 5 minutos de diferença
-            )
-            
-            email = data["email"]
-            name = data.get("name", "")
+class my_passwordresetcomplete_view(PasswordResetCompleteView):
+    template_name = 'passwordresetcomplete.html'
 
-            user, created = Usuario.objects.get_or_create(
-                username=email,
-                defaults={
-                    "first_name": name.split()[0] if name else "",
-                    "last_name": " ".join(name.split()[1:]) if name and len(name.split()) > 1 else "",
-                    "email": email,
-                }
-            )
+class feriadorequest_view(CreateView):
+    form_class = FeriadoRequestForm
+    template_name = 'feriadorequest.html'
+    success_url = reverse_lazy('calendarcurrent_view')
+    success_url = reverse_lazy("passwordresetcomplete_view")
 
-            # Se o usuário já existia mas não tinha o email preenchido, atualiza e salva
-            if not created and (not user.email or user.email != email):
-                user.email = email
-                user.save()
-
-            login(request, user)
-            return redirect("home_view")
-            
-        except ValueError:
-            logging.exception("Erro ao verificar token Google")
-            return HttpResponse(status=403)"""
+    def form_valid(self, form):
+        form.instance.usuario = self.request.user
+        return super().form_valid(form)

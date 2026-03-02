@@ -7,11 +7,88 @@ Feriadou - Calendário
 
 {% block content %}
 
-<h2 class="text-[2rem] font-medium text-fblack">Feriados em Rio de Janeiro, RJ</h2>
+<div class="flex items-center gap-4">
 
-<section class="flex justify-between my-12 w-full">
+{% if municipio and municipio != 'None'  %}
+<h2 class="text-[2rem] font-medium text-fblack">Feriados em <span class="text-rose ">{{ municipio }}, {{ uf }}</span></h2>
+{% elif uf and uf != 'None' %}
+<h2 class="text-[2rem] font-medium text-fblack">Feriados no estado <span class="text-rose ">{{ uf }}</span></h2>
+{% else %}
+<h2 class="text-[2rem] font-medium text-fblack">Olá, <span class="text-rose ">escolha sua localização!</span></h2>
+{% endif %}
 
-<div class="flex-1 max-w-[22rem] p-8 bg-rose rounded-2xl shadow">
+{% if municipios %}
+<form method="GET" action="{% url 'calendarcurrent_view' %}">
+  <div class="relative inline-block">
+    <div class="flex items-center gap-2">
+      <img src="{% static 'img/location.svg' %}" 
+              alt="Location">
+      <label class="text-rose text-lg font-medium underline cursor-pointer">
+        Escolher município
+      </label>
+    </div>
+    <input type="hidden" name="uf" value="{{ uf }}">
+    <select name="municipio" onchange="this.form.submit()" class="absolute inset-0 opacity-0 text-rose bg-white">
+      {% for municipio in municipios %}
+      <option value="{{ municipio }}">{{ municipio }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+<a class="text-fblack text-lg font-medium underline cursor-pointer" href="{% url 'calendarcurrent_view' %}">Trocar Estado</a>
+
+{% else %}
+<form method="GET" action="{% url 'calendarcurrent_view' %}">
+  <div class="relative inline-block">
+    <div class="flex items-center gap-2">
+      <img src="{% static 'img/location.svg' %}" 
+              alt="Location">
+      <label class="text-rose text-lg font-medium underline cursor-pointer">
+        Escolher localização
+      </label>
+    </div>
+    <select name="uf" onchange="this.form.submit()" class="absolute inset-0 opacity-0 text-rose bg-white">
+      <option value="">Selecione uma UF</option>
+      <option value="AC">AC</option>
+      <option value="AL">AL</option>
+      <option value="AM">AM</option>
+      <option value="AP">AP</option>
+      <option value="BA">BA</option>
+      <option value="CE">CE</option>
+      <option value="DF">DF</option>
+      <option value="ES">ES</option>
+      <option value="GO">GO</option>
+      <option value="MA">MA</option>
+      <option value="MG">MG</option>
+      <option value="MS">MS</option>
+      <option value="MT">MT</option>
+      <option value="PA">PA</option>
+      <option value="PB">PB</option>
+      <option value="PE">PE</option>
+      <option value="PI">PI</option>
+      <option value="PR">PR</option>
+      <option value="RJ">RJ</option>
+      <option value="RN">RN</option>
+      <option value="RO">RO</option>
+      <option value="RR">RR</option>
+      <option value="RS">RS</option>
+      <option value="SC">SC</option>
+      <option value="SE">SE</option>
+      <option value="SP">SP</option>
+      <option value="TO">TO</option>
+    </select>
+  </div>
+</form>
+{% endif %}
+
+</div>
+
+<section class="flex gap-12 my-12 w-full">
+
+<!-- COLUNA ESQUERDA -->
+<div class="flex flex-col items-center flex-1 gap-8">
+
+<div class="flex-1 w-full p-8 bg-rose rounded-2xl">
   <h3 class="text-xl text-center font-bold text-fwhite mb-4">Feriados Próximos</h3>
   <ul class="text-left list-disc font-semibold list-outside space-y-4 text-fwhite max-w-[16rem] mx-auto">
     {% for feriado in feriados %}
@@ -22,15 +99,36 @@ Feriadou - Calendário
   </ul>
 </div>
 
+<div class="text-center">
+  <p class="text-fblack font-medium text-xl mb-4 leading-relaxed">
+    Não encontrou algum feriado?
+  </p>
+
+  {% if user.is_authenticated %}
+  <a href="{% url 'feriadorequest_view' %}" class="w-fit bg-rose hover:bg-[#FF71AA] text-white font-bold p-2 px-4 rounded-3xl transition-all transform hover:-translate-y-0.5 text-lg">
+    Faça uma solicitação!
+  </a>
+  {% else %}
+  <a href="{% url 'login_view' %}" class="w-fit bg-rose hover:bg-[#FF71AA] text-white font-bold p-2 px-4 rounded-3xl transition-all transform hover:-translate-y-0.5 text-lg">
+    Faça uma solicitação!
+  </a>
+  {% endif %}
+</div>
+
+</div>
+
+<!-- COLUNA DIREITA -->
+<div class="flex flex-col gap-8">
+
 <div class="border border-rose border-2 rounded-2xl w-fit p-20 pb-16 pt-8">
 <div class="justify-items-center">
   <div class ="flex flex-row items-center justify-between gap-4 mb-4">
-    <a href="{% url 'calendar_view' year=previous_year month=previous_month %}"
+    <a href="{% url 'calendar_view' year=previous_year month=previous_month %}?uf={{ uf }}{% if municipio %}&municipio={{ municipio }}{% endif %} "
     class="">
     <img src="{% static 'img/arrowleft.svg' %}">
     </a>
     <h2 class="text-[2rem] font-medium text-fblack text-center mx-6 mb-2">{{ month_name }}</h2>
-    <a href="{% url 'calendar_view' year=next_year month=next_month %}"><img src="{% static 'img/arrowright.svg' %}"></a>
+    <a href="{% url 'calendar_view' year=next_year month=next_month %}?uf={{ uf }}{% if municipio %}&municipio={{ municipio }}{% endif %}"><img src="{% static 'img/arrowright.svg' %}"></a>
   </div>
   <div class="grid grid-cols-7 gap-y-6 gap-x-20 w-fit text-center text-[2rem] font-medium text-fblack">
     <div class="font-semibold">Dom</div>
@@ -41,7 +139,7 @@ Feriadou - Calendário
     <div class="font-semibold">Sex</div>
     <div class="font-semibold">Sáb</div>
 
-    <!-- Dias (exemplo simplificado) -->
+    <!-- Dias -->
     {% for week in month_calendar %}
       {% for day in week %}
         {% if day == 0 %}
@@ -53,6 +151,8 @@ Feriadou - Calendário
           <div class="bg-magenta text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
           {% elif day in feriadosnacionais %}
           <div class="bg-purple text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          {% else %}
+          <div class="text-rose w-16 h-16 flex items-center justify-center">{{ day }}</div>
           {% endif %}
         {% else %}
           <div class="text-rose w-16 h-16 flex items-center justify-center">{{ day }}</div>
@@ -62,6 +162,22 @@ Feriadou - Calendário
 
 </div>
 </div>
+</div>
+
+<div class="flex gap-6 justify-center">
+    <button disabled class="w-fit bg-pink hover:bg-[#FF71AA] text-white font-bold p-2 px-4 rounded-3xl transition-all text-lg">
+    Municipal
+    </button> 
+
+    <button disabled class="w-fit bg-magenta hover:bg-[#FF71AA] text-white font-bold p-2 px-4 rounded-3xl transition-all text-lg">
+    Estadual
+    </button> 
+
+    <button disabled class="w-fit bg-purple hover:bg-[#FF71AA] text-white font-bold p-2 px-4 rounded-3xl transition-all text-lg">
+    Nacional
+    </button> 
+</div>
+
 </section>
 
 {% endblock %}
