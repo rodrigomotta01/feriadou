@@ -32,3 +32,4 @@ __pycache__/
 
 # Administração do sistema
 feriadou/utils.py
+backup.sql
