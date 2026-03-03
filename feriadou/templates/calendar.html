@@ -146,11 +146,26 @@ Feriadou - Calendário
           <div class="w-16 h-16"></div>
         {% elif day in feriados_days %}
           {% if day in feriadosmunicipais %}
-          <div class="bg-pink text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          <div class="relative group">
+              <span class="bg-pink text-white rounded-full w-16 h-16 flex items-center justify-center cursor-pointer hover:brightness-110 transition-all">{{ day }}</span>
+              <div class="hidden group-hover:flex absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-pink text-white font-bold rounded-xl px-4 py-2 z-10 text-base whitespace-nowrap justify-center">
+                  {% for dia, nome in feriadosmunicipais.items %}{% if dia == day %}{{ nome }}{% endif %}{% endfor %}
+              </div>
+          </div>
           {% elif day in feriadosestaduais %}
-          <div class="bg-magenta text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          <div class="relative group">
+              <span class="bg-magenta text-white rounded-full w-16 h-16 flex items-center justify-center cursor-pointer hover:brightness-110 transition-all">{{ day }}</span>
+              <div class="hidden group-hover:flex absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-magenta text-white font-bold rounded-xl px-4 py-2 z-10 text-base whitespace-nowrap justify-center">
+                  {% for dia, nome in feriadosestaduais.items %}{% if dia == day %}{{ nome }}{% endif %}{% endfor %}
+              </div>
+          </div>
           {% elif day in feriadosnacionais %}
-          <div class="bg-purple text-white rounded-full w-16 h-16 flex items-center justify-center">{{ day }}</div>
+          <div class="relative group">
+              <span class="bg-purple text-white rounded-full w-16 h-16 flex items-center justify-center cursor-pointer hover:brightness-110 transition-all">{{ day }}</span>
+              <div class="hidden group-hover:flex absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-purple text-white font-bold rounded-xl px-4 py-2 z-10 text-base whitespace-nowrap justify-center">
+                  {% for dia, nome in feriadosnacionais.items %}{% if dia == day %}{{ nome }}{% endif %}{% endfor %}
+              </div>
+          </div>
           {% else %}
           <div class="text-rose w-16 h-16 flex items-center justify-center">{{ day }}</div>
           {% endif %}

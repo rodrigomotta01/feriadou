@@ -32,6 +32,16 @@ def get_municipios(uf):
 
     cache.set(cache_key, municipios, timeout=60*60*2)
     return municipios
+    
+def get_feriados_mes(month):
+    cache_key = f'feriados_sem_uf_{month}'
+    feriados = cache.get(cache_key)
+    if feriados:
+        return feriados
+    
+    feriados = {f.day for f in Feriado.objects.filter(month=month, estado=None)}
+    cache.set(cache_key, feriados, timeout=60*60*24)
+    return feriados
 
 def calendar_view(request, year=None, month=None):
     
@@ -89,17 +99,17 @@ def calendar_view(request, year=None, month=None):
     # Get upcoming holidays this year
     feriados = Feriado.objects.filter(
         models.Q(month__gt=current_month) |
-        models.Q(month=current_month, day__gte=current_day-1)
+        models.Q(month=current_month, day__gte=current_day-1), models.Q(estado=uf) | models.Q(estado=None), models.Q(municipio=municipio) | models.Q(municipio=None)
     ).order_by('month', 'day')[:5]
-    
+
     feriados_mes = Feriado.objects.filter(month=month)
     feriados_days = {feriado.day for feriado in feriados_mes}
 
-    feriados_municipais = {f.day for f in Feriado.objects.filter(escopo="Municipal", month=month, estado=uf, municipio=municipio)}
-    feriados_estaduais = {f.day for f in Feriado.objects.filter(escopo="Estadual", month=month, estado=uf)}
-    feriados_nacionais = {f.day for f in Feriado.objects.filter(escopo="Nacional", month=month)}
+    feriados_municipais = {feriado.day: feriado.name for feriado in Feriado.objects.filter(escopo="Municipal", month=month, estado=uf, municipio=municipio)}
+    feriados_estaduais = {feriado.day: feriado.name for feriado in Feriado.objects.filter(escopo="Estadual", month=month, estado=uf)}
+    feriados_nacionais = {feriado.day: feriado.name for feriado in Feriado.objects.filter(escopo="Nacional", month=month)}
 
-    if uf:
+    if uf and uf != "None":
         municipios = get_municipios(uf)
     else:
         municipios = None

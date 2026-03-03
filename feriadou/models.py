@@ -34,6 +34,11 @@ class Feriado(models.Model):
         default = NACIONAL,
     )
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['month', 'escopo', 'estado']),
+        ]
+
     def __str__(self):
         return f"{self.name} - {self.day:02d}/{self.month:02d} ({self.escopo})"
     
